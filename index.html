@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Stats</title>
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            width: calc(100% - 22px);
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        #userStats {
+            text-align: left;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Stats</h1>
+        <input type="text" id="userIdInput" placeholder="Enter User ID">
+        <button onclick="fetchUserData()">Get Stats</button>
+        <div id="userStats"></div>
+    </div>
+    <script>
+        const serverURL = "https://your-fastapi-server.com"; // Replace with your server's URL
+        async function fetchUserData() {
+            const userId = document.getElementById('userIdInput').value;
+            if (!userId) {
+                alert('Please enter a User ID.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${serverURL}/user_data?user_id=${userId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                displayUserData(data);
+            } catch (error) {
+                console.error('There was a problem retrieving user data:', error);
+                document.getElementById('userStats').innerHTML = `<p>Error retrieving data: ${error.message}</p>`;
+            }
+        }
+
+        function displayUserData(data) {
+            const statsElement = document.getElementById('userStats');
+            statsElement.innerHTML = `
+                <p>User ID: ${data.userid}</p>
+                <h3>Models:</h3>
+                <ul>
+                    ${data.models.map(model => `
+                        <li>
+                            <p>Name: ${model.name}</p>
+                            <p>Requests per minute: ${model.requests_per_minute}</p>
+                            <p>Requests per day: ${model.requests_per_day}</p>
+                            <p>Total requests made today: ${model.total_requests_made}</p>
+                            <p>Last used: ${model.last_used ? new Date(model.last_used * 1000).toLocaleString() : 'N/A'}</p>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+    </script>
+</body>
+</html>
